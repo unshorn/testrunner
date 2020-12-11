@@ -1,8 +1,9 @@
 package edu.illinois.cs.testrunner.runner;
 
 import edu.illinois.cs.testrunner.data.framework.TestFramework;
-import edu.illinois.cs.testrunner.util.MavenClassLoader;
+import edu.illinois.cs.testrunner.util.ProjectClassLoader;
 
+import edu.illinois.cs.testrunner.util.ProjectWrapper;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
@@ -16,23 +17,38 @@ import java.util.stream.Stream;
 import scala.Option;
 
 public class RunnerFactory {
-    public static Option<Runner> from(final MavenProject project) {
+    public static Option<Runner> from(final ProjectWrapper project) {
         return TestFramework.testFramework(project)
-                .map(framework -> create(framework, new MavenClassLoader(project).classpath(),
-                        surefireEnvironment(project), project.getBasedir().toPath()));
+                .map(framework -> create(framework, new ProjectClassLoader(project).classpath(),
+                        project.surefireEnvironment(), project.getBasedir().toPath()));
     }
 
-    public static List<Runner> allFrom(final MavenProject project) {
+    public static List<Runner> allFrom(final ProjectWrapper project) {
         return TestFramework.getListOfFrameworks(project).stream()
                 .map(framework ->
-                        create(framework, new MavenClassLoader(project).classpath(),
-                               surefireEnvironment(project), project.getBasedir().toPath()))
+                        create(framework, new ProjectClassLoader(project).classpath(),
+                               project.surefireEnvironment(), project.getBasedir().toPath()))
                 .collect(Collectors.toList());
     }
 
     public static Runner create(final TestFramework framework, final String classpath,
                                 final Map<String, String> environment, final Path outputPath) {
         return SmartRunner.withFramework(framework, classpath, environment, outputPath);
+    }
+
+    // Needed for backward compatibility
+    public static Option<Runner> from(final MavenProject project) {
+        return TestFramework.testFramework(project)
+                .map(framework -> create(framework, new ProjectClassLoader(project).classpath(),
+                        surefireEnvironment(project), project.getBasedir().toPath()));
+    }
+
+    public static List<Runner> allFrom(final MavenProject project) {
+        return TestFramework.getListOfFrameworks(project).stream()
+                .map(framework ->
+                        create(framework, new ProjectClassLoader(project).classpath(),
+                               surefireEnvironment(project), project.getBasedir().toPath()))
+                .collect(Collectors.toList());
     }
 
     private static <T> Stream<T> emptyIfNull(final T t) {
