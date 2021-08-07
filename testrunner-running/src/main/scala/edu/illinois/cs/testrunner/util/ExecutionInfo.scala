@@ -31,7 +31,7 @@ case class ExecutionInfo(classpath: String, javaAgent: Option[Path],
     }
 
     def args(args: String*): List[String] =
-        List("java", "-cp", classpath) ++
+        List("java", "-ea", "-cp", classpath) ++
         javaAgent.map(p => List("-javaagent:" ++ p.toAbsolutePath.toString)).getOrElse(List.empty) ++
         javaOpts ++
         properties.map(p => "-D" ++ p._1 ++ "=" ++ p._2) ++
