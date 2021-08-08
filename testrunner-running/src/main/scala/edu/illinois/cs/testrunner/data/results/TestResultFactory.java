@@ -6,7 +6,8 @@ import org.junit.ComparisonFailure;
 public class TestResultFactory {
     public static boolean isAssertFailure(final Throwable exception) {
         return exception.getClass().equals(AssertionFailedError.class) ||
-                exception.getClass().equals(ComparisonFailure.class);
+                exception.getClass().equals(ComparisonFailure.class) ||
+                exception.getClass().equals(java.lang.AssertionError.class);
     }
 
     public static TestResult passing(final double time, final String testName) {

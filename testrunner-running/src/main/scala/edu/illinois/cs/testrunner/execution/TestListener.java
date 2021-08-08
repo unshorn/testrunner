@@ -45,6 +45,7 @@ public class TestListener extends RunListener {
 
     @Override
     public void testAssumptionFailure(Failure failure) {
+        ignoredTests.add(JUnitTestRunner.fullName(failure.getDescription()));
         failure.getException().printStackTrace();
     }
 
